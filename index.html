@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Autorización Mercado Libre</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --ink: #1a1a1a;
+      --muted: #5c6670;
+      --ok: #0a7a3e;
+      --err: #b00020;
+      --card: #fff;
+      --line: #d8dee4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: linear-gradient(165deg, #e8eef3 0%, var(--bg) 45%, #dde5ec 100%);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    main {
+      width: min(560px, 100%);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 28px 24px;
+      box-shadow: 0 8px 28px rgba(20, 30, 40, 0.08);
+    }
+    h1 { margin: 0 0 8px; font-size: 1.35rem; }
+    p { margin: 0 0 12px; line-height: 1.45; color: var(--muted); }
+    .status-ok { color: var(--ok); font-weight: 600; }
+    .status-err { color: var(--err); font-weight: 600; }
+    .box {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: #fafbfc;
+      word-break: break-all;
+      font-size: 0.85rem;
+      color: var(--ink);
+    }
+    button {
+      margin-top: 16px;
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #3483fa;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.55; cursor: default; }
+    .hint { font-size: 0.9rem; margin-top: 16px; }
+    ol { margin: 8px 0 0; padding-left: 1.2rem; color: var(--muted); }
+    li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="title">Autorización</h1>
+    <p id="lead"></p>
+    <div id="url-box" class="box" hidden></div>
+    <button id="copy" type="button" hidden>Copiar URL</button>
+    <div class="hint" id="hint" hidden>
+      <p>Qué hacer ahora:</p>
+      <ol>
+        <li>Tocá «Copiar URL» (o copiá la barra del navegador).</li>
+        <li>Mandale esa URL a Leo por WhatsApp.</li>
+        <li>Podés cerrar esta pestaña.</li>
+      </ol>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var title = document.getElementById("title");
+      var lead = document.getElementById("lead");
+      var box = document.getElementById("url-box");
+      var copyBtn = document.getElementById("copy");
+      var hint = document.getElementById("hint");
+      var code = params.get("code");
+      var err = params.get("error");
+      var errDesc = params.get("error_description");
+
+      if (err) {
+        title.textContent = "No se pudo autorizar";
+        lead.innerHTML = '<span class="status-err">Mercado Libre rechazó el permiso.</span> '
+          + (errDesc || err);
+        return;
+      }
+
+      if (!code) {
+        title.textContent = "Esperando autorización";
+        lead.textContent = "Esta página es el redirect de la app. Abrí el link de instalación que te mandó Leo, logueada en la cuenta de la tienda.";
+        return;
+      }
+
+      title.textContent = "Listo";
+      lead.innerHTML = '<span class="status-ok">La app quedó autorizada en esta cuenta.</span> '
+        + "Falta que Leo cierre el vínculo con la URL de abajo.";
+      box.hidden = false;
+      box.textContent = window.location.href;
+      copyBtn.hidden = false;
+      hint.hidden = false;
+      copyBtn.addEventListener("click", function () {
+        navigator.clipboard.writeText(window.location.href).then(function () {
+          copyBtn.textContent = "URL copiada";
+          copyBtn.disabled = true;
+        }).catch(function () {
+          copyBtn.textContent = "Seleccioná y copiá a mano";
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
